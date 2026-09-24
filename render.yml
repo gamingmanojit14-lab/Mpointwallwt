@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: p2p-wallet-api
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install --production
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: WALLET_APP_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_LOCK_WINDOW_MS
+        value: "900000"
+      - key: AUTH_MAX_FAILURES
+        value: "5"
