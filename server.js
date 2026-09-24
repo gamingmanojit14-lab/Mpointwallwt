@@ -1,6 +1,16 @@
 /**
  * P2P Wallet API — Express server for Render.com
- * Hosted at e.g. https://p2p-wallet-api.onrender.com
+ * Hosted at https://mpointwallwt-1.onrender.com
+ *
+ * Routes:
+ *   POST /api/verifyConnection
+ *   POST /api/debitPoints
+ *   POST /api/creditPoints
+ *   GET  /api/getBalance
+ *   POST /api/createPaymentRequest
+ *   GET  /api/paymentStatus
+ *   POST /api/p2pTransfer        ← Wallet App → Wallet App
+ *   POST /api/confirmPayment     ← Wallet App pays merchant request
  */
 const express = require('express');
 const cors = require('cors');
@@ -10,11 +20,13 @@ require('dotenv').config();
 const { initFirebase } = require('./utils/firebase');
 const { globalLimiter, authFailLimiter } = require('./middleware/rateLimit');
 
+// ---------- Route imports ----------
 const verifyRoute = require('./routes/verify');
 const debitRoute = require('./routes/debit');
 const creditRoute = require('./routes/credit');
 const balanceRoute = require('./routes/balance');
 const requestRoute = require('./routes/request');
+const p2pRoute = require('./routes/p2p');           // ⬅️ NEW
 
 const app = express();
 
@@ -44,7 +56,6 @@ app.get('/', (req, res) => {
 
 // ---------- Rate limiting ----------
 app.use('/api/', globalLimiter);
-// auth-failure lock applies to auth-protected endpoints
 app.use('/api/', authFailLimiter);
 
 // ---------- Routes ----------
@@ -53,6 +64,7 @@ app.use('/api', debitRoute);
 app.use('/api', creditRoute);
 app.use('/api', balanceRoute);
 app.use('/api', requestRoute);
+app.use('/api', p2pRoute);                          // ⬅️ NEW
 
 // ---------- 404 ----------
 app.use((req, res) => {
@@ -68,6 +80,7 @@ app.use((err, req, res, _next) => {
   });
 });
 
+// ---------- Start server ----------
 const PORT = Number(process.env.PORT || 10000);
 const server = app.listen(PORT, () => {
   console.log(`✅ P2P Wallet API running on port ${PORT}`);
@@ -88,9 +101,3 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
 module.exports = app;
-
-// উপরের require-গুলোর সাথে যোগ করুন:
-const p2pRoute = require('./routes/p2p');
-
-// Routes section-এ যোগ করুন:
-app.use('/api', p2pRoute);
