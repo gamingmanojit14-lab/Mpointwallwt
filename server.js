@@ -88,3 +88,9 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
 module.exports = app;
+
+// উপরের require-গুলোর সাথে যোগ করুন:
+const p2pRoute = require('./routes/p2p');
+
+// Routes section-এ যোগ করুন:
+app.use('/api', p2pRoute);
